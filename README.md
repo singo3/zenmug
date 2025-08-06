@@ -3,6 +3,13 @@
 ユーザーが入力したテキストを日本語の俳句に変換し、縦書きでマグカップ画像に合成する簡易ツール。
 Vercelはwataridori69@gmail.comアカウント
 
+Deployment
+zenmug-5fq8zyps4-singo3s-projects.vercel.app
+Domains
+zenmug.vercel.app
+zenmug-singo3s-projects.vercel.app
+
+
 作業再開時の環境有効化（毎回の作業時）
 プロジェクトフォルダで以下を実行。
 source env/bin/activate
