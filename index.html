@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Haiku Mug Generator</title>
+  <style>
+    input { width: 120px; }
+  </style>
+</head>
+<body>
+  <h3>俳句マグカップ生成</h3>
+
+  <div>
+    <input type="text" id="line1" placeholder="5文字">
+    <input type="text" id="line2" placeholder="7文字">
+    <input type="text" id="line3" placeholder="5文字">
+    <button onclick="drawHaiku()">生成</button>
+  </div>
+
+  <br>
+  <canvas id="canvas" width="500" height="500"></canvas>
+
+  <script src="script.js"></script>
+</body>
+</html>
