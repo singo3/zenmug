@@ -1,38 +1,78 @@
 # Haiku Mug Generator
 
-ユーザーが入力したテキストを日本語の俳句に変換し、縦書きでマグカップ画像に合成する簡易ツール。
+Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本文化が好きな海外ユーザーが好きな英語の文章（行数不問）を入力すると、日本語の 5-7-5 俳句と英訳を生成し、マグカップ画像に縦書きで合成する EC サイトを目指しています。現状のコードは `src/app/page.tsx` で三行を手動入力するサンプルですが、今後は任意テキストの自動処理へ拡張していきます。
 
-作業再開時の環境有効化（毎回の作業時）
-プロジェクトフォルダで以下を実行。
-source env/bin/activate
-
----
-
-## 🛠️ 開発環境と使用ライブラリ
-
-- **Pythonバージョン**: 3.11（環境に合わせて調整）
-- **仮想環境**: venv
-- **使用ライブラリ**:
-  - Pillow
-  - OpenCV（必要に応じて追加）
+## 🎯 目指す最終プロダクト / UX
+- 英語を扱う日本文化ファンが、自由な英語テキストを入力して送信すると、日本語の5-7-5俳句とその英訳が生成される。
+- 生成された俳句を縦書きでマグカップ画像に合成し、画面に俳句と英訳が表示される。
+- 気に入れば購入ボタンから住所を入力して注文でき、PrintfulとShopifyを通じて俳句入りマグカップが自動配送される。
 
 ---
 
-## 🚀 セットアップ方法（初回のみ）
+## 🛠️ セットアップ
+1. Node.js (LTS) をインストール。
+2. 依存関係のインストール。
+   ```bash
+   npm install
+   ```
+3. 開発サーバー起動。
+   ```bash
+   npm run dev
+   ```
+   ブラウザで [http://localhost:3000](http://localhost:3000) を開きます。
 
-プロジェクトディレクトリ内で、以下を順番に実行します。
+---
 
-### 1. 仮想環境作成と有効化
+## 🤖 OpenAI での俳句自動生成（追加予定）
+1. `src/app/api/haiku/route.ts` を作成し、`POST` で英語テキストを受け取って OpenAI API を呼び出す。
+2. フロントエンドから `/api/haiku` へリクエストを送り、返ってきた 5-7-5 俳句と英訳をキャンバス描画処理に渡す。
+3. `.env.local` に API キーを設定。
+   ```bash
+   OPENAI_API_KEY=sk-...
+   ```
 
-**Mac/Linuxの場合**
-```bash
-python -m venv env
-source env/bin/activate
+---
 
-2. 必要なライブラリのインストール方法
-pip install -r requirements.txt
+## 🖨️ Printful 連携（追加予定）
+1. `src/app/api/printful/route.ts` を作成し、生成したマグカップ画像を `POST` で受け取る。
+2. Printful の Product Create エンドポイント等を呼び出し、商品を生成。
+3. 必要な環境変数を `.env.local` に設定。
+   ```bash
+   PRINTFUL_API_KEY=...
+   PRINTFUL_TEMPLATE_ID=...
+   ```
 
+---
 
-ライブラリを追加した場合の更新方法
-新しくパッケージを追加したら、以下を実行し更新します。
-pip freeze > requirements.txt
+## 🛍️ Shopify 連携（任意）
+- **Printful → Shopify 自動連携**: Printful 管理画面で Shopify ストアを接続すると、Printful で作成した商品が自動で Shopify に同期されます。
+- **直接 Shopify API を操作する場合**: `src/app/api/shopify/` などにルートを作り、REST/GraphQL API を呼び出します。
+  ```bash
+  SHOPIFY_STORE_URL=...
+  SHOPIFY_ACCESS_TOKEN=...
+  ```
+
+---
+
+## 🔧 開発フロー指針（Codex 利用時）
+1. `src/app/page.tsx` に入力フォームと送信処理を実装し、`/api/haiku` へ英語テキストを送る。
+2. `src/app/api/haiku/route.ts` で OpenAI API を使い 5-7-5 の日本語俳句と英訳を生成して返す。
+3. 返却された俳句をキャンバスに縦書き描画し、生成した画像データを `/api/printful` に送信。
+4. `src/app/api/printful/route.ts` から Printful Product API を呼び出し、マグカップ商品を作成。
+5. Shopify との連携が必要なら Printful の Shopify 接続を使うか、`src/app/api/shopify/route.ts` を実装して REST/GraphQL API を呼ぶ。
+6. 住所入力フォームと注文ボタンを追加し、注文情報を Printful（および必要に応じて Shopify）に送信して配送を確定する。
+7. 上記で使用する API キーや各種 ID は `.env.local` に保存し、Git にはコミットしない。
+
+---
+
+## 🧪 ビルド / テスト
+- 開発中はブラウザで動作を確認しながら、俳句生成→キャンバス描画→Printful/Shopify 連携の一連の流れを検証します。
+- 本番ビルド:
+  ```bash
+  npm run build
+  npm run start
+  ```
+
+---
+
+この README の手順に従うことで、Codex などの支援を受けながら、英語入力から日本語俳句を自動生成し、マグカップ画像に合成して Printful・Shopify と連携する EC サイトを構築できます。
