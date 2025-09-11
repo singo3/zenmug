@@ -4,7 +4,7 @@
 -------------------------------------------- */
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function Home() {
   /* Canvas への参照を保持 */
@@ -13,9 +13,11 @@ export default function Home() {
   const [haiku, setHaiku] = useState<{ ja: string[]; en: string[] } | null>(
     null,
   );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   /** 俳句を Canvas に描画 */
-  function drawHaiku(lines: string[]) {
+  const drawHaiku = useCallback((lines: string[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -70,17 +72,42 @@ export default function Home() {
         );
       });
     };
-  }
+  }, []);
+
+  useEffect(() => {
+    if (haiku) {
+      drawHaiku(haiku.ja);
+    }
+  }, [haiku, drawHaiku]);
 
   async function handleGenerate() {
-    const res = await fetch("/api/haiku", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-    const data = await res.json();
-    setHaiku(data.haiku);
-    drawHaiku(data.haiku.ja);
+    setError(null);
+    if (!text.trim()) {
+      setError("Text is required");
+      return;
+    }
+    if (text.length > 200) {
+      setError("Text must be 200 characters or fewer");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/haiku", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) {
+        const { error: errMsg } = await res.json();
+        throw new Error(errMsg || "Failed to generate");
+      }
+      const data = await res.json();
+      setHaiku(data.haiku);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   /* ---------- JSX ---------- */
@@ -97,10 +124,12 @@ export default function Home() {
         />
         <button
           onClick={handleGenerate}
-          className="mt-2 rounded bg-blue-600 px-4 py-2 text-white"
+          className="mt-2 rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
+          disabled={loading}
         >
-          生成
+          {loading ? "生成中..." : "生成"}
         </button>
+        {error && <p className="text-red-500">{error}</p>}
       </div>
 
       <canvas

@@ -5,6 +5,9 @@ export interface HaikuResult {
 
 export async function englishToHaiku(text: string): Promise<HaikuResult> {
   const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing OpenAI API key");
+  }
   const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
   const res = await fetch("https://api.openai.com/v1/responses", {
@@ -25,11 +28,22 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   }
 
   const data = await res.json();
-  const outputText = data.output_text || data.output?.[0]?.content?.[0]?.text || "{}";
-  const json = JSON.parse(outputText);
+  const outputText =
+    typeof data.output_text === "string"
+      ? data.output_text
+      : data.output?.[0]?.content?.[0]?.text;
+  if (!outputText) {
+    throw new Error("Invalid OpenAI response format");
+  }
+  let json: { ja?: unknown; en?: unknown };
+  try {
+    json = JSON.parse(outputText);
+  } catch {
+    throw new Error("Invalid JSON in OpenAI response");
+  }
   return {
-    ja: json.ja ?? [],
-    en: json.en ?? [],
+    ja: Array.isArray(json.ja) ? (json.ja as string[]) : [],
+    en: Array.isArray(json.en) ? (json.en as string[]) : [],
   };
 }
 
