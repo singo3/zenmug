@@ -10,7 +10,7 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   }
   const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
       model,
       temperature: 0.8,
       response_format: { type: "json_object" },
-      messages: [
+      input: [
         {
           role: "system",
           content:
@@ -39,7 +39,9 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   }
 
   const data = await res.json();
-  const content = data.choices?.[0]?.message?.content;
+  const content =
+    data.output?.[0]?.content?.[0]?.text ||
+    data.choices?.[0]?.message?.content;
   if (!content) {
     throw new Error("Invalid OpenAI response format");
   }
