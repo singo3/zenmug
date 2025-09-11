@@ -4,19 +4,18 @@
 -------------------------------------------- */
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export default function Home() {
   /* Canvas への参照を保持 */
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [text, setText] = useState("");
+  const [haiku, setHaiku] = useState<{ ja: string[]; en: string[] } | null>(
+    null,
+  );
 
-  /** 旧 script.js の drawHaiku() を移植した関数 */
-  function drawHaiku() {
-    /* 入力値を取得 */
-    const line1 = (document.getElementById("line1") as HTMLInputElement).value;
-    const line2 = (document.getElementById("line2") as HTMLInputElement).value;
-    const line3 = (document.getElementById("line3") as HTMLInputElement).value;
-
+  /** 俳句を Canvas に描画 */
+  function drawHaiku(lines: string[]) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -31,7 +30,6 @@ export default function Home() {
       ctx.drawImage(mugImage, 0, 0, canvas.width, canvas.height);
 
       /* 入力 3 行を縦書き風に 3 列で描画 */
-      const lines = [line1, line2, line3];
       const columnX = [
         canvas.width / 2 - 5,
         canvas.width / 2 + 35,
@@ -74,6 +72,17 @@ export default function Home() {
     };
   }
 
+  async function handleGenerate() {
+    const res = await fetch("/api/haiku", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    setHaiku(data.haiku);
+    drawHaiku(data.haiku.ja);
+  }
+
   /* ---------- JSX ---------- */
   return (
     <main className="flex min-h-screen flex-col items-center gap-6 p-6">
@@ -81,22 +90,13 @@ export default function Home() {
 
       <div className="flex flex-col gap-2">
         <input
-          id="line1"
-          placeholder="5文字"
-          className="w-32 rounded border px-2 py-1"
-        />
-        <input
-          id="line2"
-          placeholder="7文字"
-          className="w-32 rounded border px-2 py-1"
-        />
-        <input
-          id="line3"
-          placeholder="5文字"
-          className="w-32 rounded border px-2 py-1"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Enter English text"
+          className="w-64 rounded border px-2 py-1"
         />
         <button
-          onClick={drawHaiku}
+          onClick={handleGenerate}
           className="mt-2 rounded bg-blue-600 px-4 py-2 text-white"
         >
           生成
@@ -110,6 +110,14 @@ export default function Home() {
         height={500}
         className="border"
       />
+
+      {haiku && (
+        <div className="mt-4 text-center text-sm text-gray-700">
+          {haiku.en.map((line, i) => (
+            <p key={i}>{line}</p>
+          ))}
+        </div>
+      )}
     </main>
   );
 }
