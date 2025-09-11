@@ -10,7 +10,7 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   }
   const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
-  const res = await fetch("https://api.openai.com/v1/responses", {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -18,8 +18,19 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
     },
     body: JSON.stringify({
       model,
+      temperature: 0.8,
       response_format: { type: "json_object" },
-      input: `Convert the following English text into a traditional Japanese haiku in 5-7-5 syllables and provide the English translation for each line. Return JSON with keys 'ja' and 'en' as arrays.\n\nText: ${text}`,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You turn English text into a Japanese haiku in 5-7-5 syllables and provide an English translation for each line. Respond strictly with JSON having keys 'ja' and 'en' as arrays.",
+        },
+        {
+          role: "user",
+          content: `Text: ${text}`,
+        },
+      ],
     }),
   });
 
@@ -28,16 +39,13 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   }
 
   const data = await res.json();
-  const outputText =
-    typeof data.output_text === "string"
-      ? data.output_text
-      : data.output?.[0]?.content?.[0]?.text;
-  if (!outputText) {
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) {
     throw new Error("Invalid OpenAI response format");
   }
   let json: { ja?: unknown; en?: unknown };
   try {
-    json = JSON.parse(outputText);
+    json = JSON.parse(content);
   } catch {
     throw new Error("Invalid JSON in OpenAI response");
   }
