@@ -38,7 +38,17 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   );
 
   if (!res.ok) {
-    throw new Error(`OpenAI API error: ${res.status} ${res.statusText}`);
+    let message = `OpenAI API error: ${res.status} ${res.statusText}`;
+    try {
+      const err = await res.json();
+      const apiMessage = err?.error?.message;
+      if (apiMessage) {
+        message += ` - ${apiMessage}`;
+      }
+    } catch {
+      // ignore JSON parse errors from error responses
+    }
+    throw new Error(message);
   }
 
   const data = await res.json();
