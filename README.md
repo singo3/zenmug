@@ -84,4 +84,10 @@ Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本
 
 ---
 
+## 🚀 デプロイ (GitHub & Vercel)
+- このリポジトリは GitHub へのプッシュをトリガーとして Vercel で自動ビルド・デプロイされます。
+- Vercel のデプロイ結果を通して挙動を継続的に確認できます。
+
+---
+
 この README の手順に従うことで、Codex などの支援を受けながら、英語入力から日本語俳句を自動生成し、マグカップ画像に合成して Printful・Shopify と連携する EC サイトを構築できます。
