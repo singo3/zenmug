@@ -26,10 +26,11 @@ Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本
 ## 🤖 OpenAI での俳句自動生成（実装済み）
 1. フロントエンドの `src/app/page.tsx` から `/api/haiku` (`src/app/api/haiku/route.ts`) へ英語テキストを `POST` する。
 2. `/api/haiku` で OpenAI API を呼び出し、5-7-5 の俳句と英訳を JSON で返す。
-3. `.env.local` に OpenAI の API キーを設定する。
+3. `.env.local` に OpenAI の API キーとプロジェクト ID を設定する。
    ```bash
    # プロジェクトルートで
    echo "OPENAI_API_KEY=sk-..." > .env.local
+   echo "OPENAI_PROJECT=proj_..." >> .env.local
    ```
 
 ### 手順例
