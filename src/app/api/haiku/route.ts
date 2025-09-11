@@ -1,43 +1,49 @@
 import { NextRequest } from "next/server";
 
+// 重要: まずは Node ランタイムで安定させる
+export const runtime = "nodejs";
+
 export async function POST(req: NextRequest) {
   try {
-    const { topic } = await req.json().catch(() => ({}));
-    const t =
-      typeof topic === "string" && topic.trim()
-        ? topic.slice(0, 120)
+    // 入力の健全化
+    const json = (await req.json().catch(() => ({}))) as { topic?: unknown };
+    const topic =
+      typeof json.topic === "string" && json.topic.trim()
+        ? json.topic.slice(0, 120)
         : "nature";
 
-    const key = process.env.OPENAI_API_KEY;
-    if (!key) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      console.error("OPENAI_API_KEY missing");
       return new Response("Missing OPENAI_API_KEY", { status: 500 });
     }
 
-    const r = await fetch("https://api.openai.com/v1/responses", {
+    // Responses API に統一（input + max_output_tokens）
+    const upstream = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${key}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        input: `Write a 3-line haiku in English about ${t}.`,
+        input: `Write a 3-line haiku in English about ${topic}.`,
         max_output_tokens: 80,
         temperature: 0.8,
       }),
     });
 
-    const text = await r.text();
-    if (!r.ok) {
-      return new Response(text, { status: r.status });
-    }
+    const raw = await upstream.text(); // まずは生テキストで可視化
+    const ct = upstream.headers.get("content-type") || "text/plain";
 
-    return new Response(text, {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    // 上流のステータスをそのまま返す（400のときは本文に理由が入ってる）
+    return new Response(raw, {
+      status: upstream.status,
+      headers: { "Content-Type": ct.includes("json") ? "application/json" : "text/plain" },
     });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Server error";
-    return new Response(message, { status: 500 });
+  } catch (err: unknown) {
+    console.error("haiku route crashed:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    return new Response(`Route crashed: ${message}`, { status: 500 });
   }
 }
