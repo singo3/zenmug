@@ -41,27 +41,26 @@ export async function POST(req: NextRequest) {
         text: {
           format: {
             type: "json_schema",
-            json_schema: {
-              name: "haiku_schema",
-              schema: {
-                type: "object",
-                properties: {
-                  ja: {
-                    type: "array",
-                    items: { type: "string" },
-                    minItems: 3,
-                    maxItems: 3,
-                  },
-                  en: {
-                    type: "array",
-                    items: { type: "string" },
-                    minItems: 3,
-                    maxItems: 3,
-                  },
+            name: "haiku_schema",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                ja: {
+                  type: "array",
+                  items: { type: "string" },
+                  minItems: 3,
+                  maxItems: 3,
                 },
-                required: ["ja", "en"],
-                additionalProperties: false,
+                en: {
+                  type: "array",
+                  items: { type: "string" },
+                  minItems: 3,
+                  maxItems: 3,
+                },
               },
+              required: ["ja", "en"],
+              additionalProperties: false,
             },
           },
         },
