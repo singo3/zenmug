@@ -20,18 +20,20 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
       model,
       temperature: 0.8,
       max_output_tokens: 300,
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "haiku",
-          strict: true,
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            required: ["ja", "en"],
-            properties: {
-              ja: { type: "array", items: { type: "string" } },
-              en: { type: "array", items: { type: "string" } },
+      text: {
+        format: {
+          type: "json_schema",
+          json_schema: {
+            name: "haiku",
+            strict: true,
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              required: ["ja", "en"],
+              properties: {
+                ja: { type: "array", items: { type: "string" } },
+                en: { type: "array", items: { type: "string" } },
+              },
             },
           },
         },

@@ -38,28 +38,30 @@ export async function POST(req: NextRequest) {
         input: `Generate a 3-line haiku in Japanese (5-7-5) about: ${text}\nProvide an English translation. Return JSON with keys 'ja' and 'en' (arrays of three strings).`,
         max_output_tokens: 120,
         temperature: 0.7,
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "haiku_schema",
-            schema: {
-              type: "object",
-              properties: {
-                ja: {
-                  type: "array",
-                  items: { type: "string" },
-                  minItems: 3,
-                  maxItems: 3,
+        text: {
+          format: {
+            type: "json_schema",
+            json_schema: {
+              name: "haiku_schema",
+              schema: {
+                type: "object",
+                properties: {
+                  ja: {
+                    type: "array",
+                    items: { type: "string" },
+                    minItems: 3,
+                    maxItems: 3,
+                  },
+                  en: {
+                    type: "array",
+                    items: { type: "string" },
+                    minItems: 3,
+                    maxItems: 3,
+                  },
                 },
-                en: {
-                  type: "array",
-                  items: { type: "string" },
-                  minItems: 3,
-                  maxItems: 3,
-                },
+                required: ["ja", "en"],
+                additionalProperties: false,
               },
-              required: ["ja", "en"],
-              additionalProperties: false,
             },
           },
         },
