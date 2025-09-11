@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const haiku = await englishToHaiku(text);
     return NextResponse.json({ haiku });
   } catch (err) {
-    const message = (err as Error).message;
+    const message = err instanceof Error ? err.message : String(err);
     const status = message.includes("OpenAI API error") ? 502 : 500;
     return NextResponse.json({ error: message }, { status });
   }
