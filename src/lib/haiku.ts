@@ -18,22 +18,44 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model,
-        temperature: 0.8,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "You turn English text into a Japanese haiku in 5-7-5 syllables and provide an English translation for each line. Respond strictly with JSON having keys 'ja' and 'en' as arrays.",
+    body: JSON.stringify({
+      model,
+      temperature: 0.8,
+      max_tokens: 300,
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "haiku",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            required: ["ja", "en"],
+            properties: {
+              ja: {
+                type: "array",
+                items: { type: "string" },
+              },
+              en: {
+                type: "array",
+                items: { type: "string" },
+              },
+            },
           },
-          {
-            role: "user",
-            content: `Text: ${text}`,
-          },
-        ],
-      }),
+        },
+      },
+      messages: [
+        {
+          role: "system",
+          content:
+            "You turn English text into a Japanese haiku in 5-7-5 syllables and provide an English translation for each line. Respond strictly with JSON having keys 'ja' and 'en' as arrays.",
+        },
+        {
+          role: "user",
+          content: `Text: ${text}`,
+        },
+      ],
+    }),
     },
   );
 
