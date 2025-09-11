@@ -1,6 +1,6 @@
 # Haiku Mug Generator
 
-Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本文化が好きな海外ユーザーが好きな英語の文章（行数不問）を入力すると、日本語の 5-7-5 俳句と英訳を生成し、マグカップ画像に縦書きで合成する EC サイトを目指しています。現状のコードは `src/app/page.tsx` で三行を手動入力するサンプルですが、今後は任意テキストの自動処理へ拡張していきます。
+Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本文化が好きな海外ユーザーが好きな英語の文章（行数不問）を入力すると、日本語の 5-7-5 俳句と英訳を生成し、マグカップ画像に縦書きで合成する EC サイトを目指しています。現状のコードは `src/app/page.tsx` のフォームに英語テキストを入力すると `/api/haiku` を通じて俳句と英訳を生成するサンプルです。
 
 ## 🎯 目指す最終プロダクト / UX
 - 英語を扱う日本文化ファンが、自由な英語テキストを入力して送信すると、日本語の5-7-5俳句とその英訳が生成される。
@@ -23,13 +23,22 @@ Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本
 
 ---
 
-## 🤖 OpenAI での俳句自動生成（追加予定）
-1. `src/app/api/haiku/route.ts` を作成し、`POST` で英語テキストを受け取って OpenAI API を呼び出す。
-2. フロントエンドから `/api/haiku` へリクエストを送り、返ってきた 5-7-5 俳句と英訳をキャンバス描画処理に渡す。
-3. `.env.local` に API キーを設定。
+## 🤖 OpenAI での俳句自動生成（実装済み）
+1. フロントエンドの `src/app/page.tsx` から `/api/haiku` (`src/app/api/haiku/route.ts`) へ英語テキストを `POST` する。
+2. `/api/haiku` で OpenAI API を呼び出し、5-7-5 の俳句と英訳を JSON で返す。
+3. `.env.local` に OpenAI の API キーを設定する。
    ```bash
-   OPENAI_API_KEY=sk-...
+   # プロジェクトルートで
+   echo "OPENAI_API_KEY=sk-..." > .env.local
    ```
+
+### 手順例
+1. 上記の `.env.local` を作成して API キーを設定。
+2. 開発サーバーを起動。
+   ```bash
+   npm run dev
+   ```
+3. ブラウザで [http://localhost:3000](http://localhost:3000) を開き、`src/app/page.tsx` のフォームに英語テキストを入力して「生成」をクリックすると、`/api/haiku` を経由して俳句と英訳が生成されキャンバスに描画されます。
 
 ---
 
