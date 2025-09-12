@@ -83,20 +83,3 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
     en: Array.isArray(json.en) ? (json.en as string[]) : [],
   };
 }
-
-function countSyllablesWord(word: string): number {
-  let w = word.toLowerCase();
-  if (w.length <= 3) return 1;
-  w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/u, "");
-  w = w.replace(/^y/u, "");
-  const matches = w.match(/[aeiouy]{1,2}/gu);
-  return matches ? matches.length : 1;
-}
-
-export function countSyllables(line: string): number {
-  return line
-    .split(/\s+/u)
-    .filter(Boolean)
-    .map(countSyllablesWord)
-    .reduce((a, b) => a + b, 0);
-}
