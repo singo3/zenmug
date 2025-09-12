@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 /**
  * POST /api/haiku
  * Expects: { text: string }
- * Returns: { ja: string[]; en: string[] }
+ * Returns: { haiku: { ja: string[]; en: string[] } }
  */
 export async function POST(req: NextRequest) {
   try {
@@ -20,16 +20,10 @@ export async function POST(req: NextRequest) {
 
     const haiku = await englishToHaiku(text);
 
-    return new Response(JSON.stringify(haiku), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json({ haiku });
   } catch (err: unknown) {
     console.error("haiku route crashed:", err);
     const message = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return Response.json({ error: message }, { status: 500 });
   }
 }
