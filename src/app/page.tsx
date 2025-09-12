@@ -4,7 +4,7 @@
 -------------------------------------------- */
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export default function Home() {
   /* Canvas への参照を保持 */
@@ -16,20 +16,27 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // マグカップ画像を一度だけ読み込み
+  const mugImage = useMemo(() => {
+    const img = new Image();
+    img.src = "/mug.png"; // public/mug.png にコピー済み
+    return img;
+  }, []);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  useEffect(() => {
+    mugImage.onload = () => setImageLoaded(true);
+  }, [mugImage]);
+
   /** 俳句を Canvas に描画 */
-  const drawHaiku = useCallback((lines: string[]) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const drawHaiku = useCallback(
+    (img: HTMLImageElement, lines: string[]) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-    /* 背景となるマグカップ画像を読み込み */
-    const mugImage = new Image();
-    mugImage.src = "/mug.png"; // public/mug.png にコピー済み
-
-    mugImage.onload = () => {
       /* 背景リセット & 画像描画 */
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(mugImage, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       /* 入力 3 行を縦書き風に 3 列で描画 */
       const columnX = [
@@ -71,14 +78,15 @@ export default function Home() {
           tempCanvas.height,
         );
       });
-    };
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
-    if (haiku) {
-      drawHaiku(haiku.ja);
+    if (haiku && imageLoaded) {
+      drawHaiku(mugImage, haiku.ja);
     }
-  }, [haiku, drawHaiku]);
+  }, [haiku, imageLoaded, drawHaiku, mugImage]);
 
   async function handleGenerate() {
     setError(null);
