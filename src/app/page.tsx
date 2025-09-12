@@ -4,7 +4,7 @@
 -------------------------------------------- */
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function Home() {
   /* Canvas への参照を保持 */
@@ -16,16 +16,16 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // マグカップ画像を一度だけ読み込み
-  const mugImage = useMemo(() => {
-    const img = new Image();
-    img.src = "/mug.png"; // public/mug.png にコピー済み
-    return img;
-  }, []);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   useEffect(() => {
-    mugImage.onload = () => setImageLoaded(true);
-  }, [mugImage]);
+    const img = new Image();
+    img.src = "/mug.png"; // public/mug.png にコピー済み
+    img.onload = () => {
+      imageRef.current = img;
+      setImageLoaded(true);
+    };
+  }, []);
 
   /** 俳句を Canvas に描画 */
   const drawHaiku = useCallback(
@@ -83,10 +83,10 @@ export default function Home() {
   );
 
   useEffect(() => {
-    if (haiku && imageLoaded) {
-      drawHaiku(mugImage, haiku.ja);
+    if (haiku && imageLoaded && imageRef.current) {
+      drawHaiku(imageRef.current, haiku.ja);
     }
-  }, [haiku, imageLoaded, drawHaiku, mugImage]);
+  }, [haiku, imageLoaded, drawHaiku]);
 
   async function handleGenerate() {
     setError(null);
