@@ -34,7 +34,7 @@ Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本
    ```
 
 ### 手順例
-1. 上記の `.env.local` を作成して API キーを設定。
+1. 上記の `.env.local` を作成して API キーとプロジェクト ID を設定。
 2. 開発サーバーを起動。
    ```bash
    npm run dev
