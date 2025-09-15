@@ -8,10 +8,6 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   if (!apiKey) {
     throw new Error("Missing OpenAI API key");
   }
-  const project = process.env.OPENAI_PROJECT;
-  if (!project) {
-    throw new Error("Missing OpenAI project ID");
-  }
   const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
   const res = await fetch("https://api.openai.com/v1/responses", {
@@ -19,7 +15,6 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
-      "OpenAI-Project": project,
     },
     body: JSON.stringify({
       model,
