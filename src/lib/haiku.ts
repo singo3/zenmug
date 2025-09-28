@@ -57,8 +57,14 @@ export async function englishToHaiku(
       input: [
         {
           role: "system",
-          content:
-            "You turn English text into a Japanese haiku. Each Japanese line must be exactly 5, 7, and 5 characters (not syllables) respectively. Provide natural English translations for each of the three lines. Respond strictly with JSON having keys 'ja' and 'en' as arrays.",
+          content: [
+            "You transform English input into a Japanese haiku.",
+            "Return strict JSON with keys 'ja' and 'en'.",
+            "'ja' must be an array of exactly three Japanese strings.",
+            "Line one must contain exactly 5 characters, line two 7 characters, and line three 5 characters—counting literal characters, not syllables.",
+            "Do not include punctuation, spaces, or ruby/furigana in the Japanese lines.",
+            "'en' must be an array of natural English translations, one per line in the same order.",
+          ].join(" "),
         },
         { role: "user", content: `Text: ${text}` },
       ],
