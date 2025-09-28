@@ -86,6 +86,62 @@ response_format: {
 
 With the schema expressed as an object, the request satisfies the API's validation rules and the error disappears.
 
+### A looser schema that avoids errors
+
+If you only need the model to return three text lines—without strictly enforcing the 5-7-5 syllable counts—you can keep the schema even simpler. The following schema accepts any three strings, so it never triggers the validation error while still providing a predictable structure in the response:
+
+```ts
+response_format: {
+  type: "json_schema",
+  json_schema: {
+    name: "haiku",
+    schema: {
+      type: "object",
+      required: ["lines"],
+      properties: {
+        lines: {
+          type: "array",
+          minItems: 3,
+          maxItems: 3,
+          items: { type: "string" },
+        },
+      },
+      additionalProperties: false,
+    },
+  },
+}
+```
+
+Because the schema is an object, it remains valid JSON Schema. At the same time it deliberately omits any `minLength`/`maxLength` constraints, so the API does not reject the request even if the generated lines fail to follow 5-7-5. This lets you keep a structured response while avoiding the `Invalid schema` error entirely.
+
+#### 緩いスキーマでエラーを防ぐには？
+
+5-7-5 の音節制約まで厳密にチェックしたい場合は上記のように `prefixItems` を使って条件を書く必要がありますが、単に「3 行のテキストを返してほしい」だけならもっと緩いスキーマでも十分です。例えば次のように、`lines` プロパティが文字列の配列であることだけを指定します。
+
+```ts
+response_format: {
+  type: "json_schema",
+  json_schema: {
+    name: "haiku",
+    schema: {
+      type: "object",
+      required: ["lines"],
+      properties: {
+        lines: {
+          type: "array",
+          minItems: 3,
+          maxItems: 3,
+          items: { type: "string" },
+        },
+      },
+      additionalProperties: false,
+    },
+  },
+}
+```
+
+このスキーマは JSON Schema のルールを満たしているため 400 エラーにはなりません。一方で `minLength` や `maxLength` を設定していないので、生成された文字列が 5-7-5 でなくても API 側で弾かれることはありません。構造だけをゆるやかに決めておきたいときに便利な設定です。
+
 [`type`]: https://json-schema.org/draft/2020-12/json-schema-validation#name-type
 [`items`]: https://json-schema.org/draft/2020-12/json-schema-validation#name-items
 [`prefixItems`]: https://json-schema.org/draft/2020-12/json-schema-validation#name-prefixitems
