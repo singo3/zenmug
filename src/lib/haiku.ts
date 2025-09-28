@@ -24,6 +24,9 @@ export async function englishToHaiku(
       temperature: 0.8,
       max_output_tokens: 300,
       text: {
+        // `response_format` was renamed to `text.format` in the Responses API.
+        // Continue enforcing the schema via the new field so the request passes
+        // validation while still guaranteeing 5-7-5 output.
         format: {
           type: "json_schema",
           json_schema: {
