@@ -3,7 +3,10 @@ export interface HaikuResult {
   en: string[];
 }
 
-export async function englishToHaiku(text: string): Promise<HaikuResult> {
+export async function englishToHaiku(
+  text: string,
+  attempt = 1,
+): Promise<HaikuResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error("Missing OpenAI API key");
@@ -30,8 +33,23 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
             additionalProperties: false,
             required: ["ja", "en"],
             properties: {
-              ja: { type: "array", items: { type: "string" } },
-              en: { type: "array", items: { type: "string" } },
+              ja: {
+                type: "array",
+                minItems: 3,
+                maxItems: 3,
+                items: [
+                  { type: "string", minLength: 5, maxLength: 5 },
+                  { type: "string", minLength: 7, maxLength: 7 },
+                  { type: "string", minLength: 5, maxLength: 5 },
+                ],
+                additionalItems: false,
+              },
+              en: {
+                type: "array",
+                minItems: 3,
+                maxItems: 3,
+                items: { type: "string" },
+              },
             },
           },
         },
@@ -40,7 +58,7 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
         {
           role: "system",
           content:
-            "You turn English text into a Japanese haiku in 5-7-5 syllables and provide an English translation for each line. Respond strictly with JSON having keys 'ja' and 'en' as arrays.",
+            "You turn English text into a Japanese haiku. Each Japanese line must be exactly 5, 7, and 5 characters (not syllables) respectively. Provide natural English translations for each of the three lines. Respond strictly with JSON having keys 'ja' and 'en' as arrays.",
         },
         { role: "user", content: `Text: ${text}` },
       ],
@@ -73,8 +91,21 @@ export async function englishToHaiku(text: string): Promise<HaikuResult> {
   } catch {
     throw new Error("Invalid JSON in OpenAI response");
   }
-  return {
-    ja: Array.isArray(json.ja) ? (json.ja as string[]) : [],
-    en: Array.isArray(json.en) ? (json.en as string[]) : [],
-  };
+  const ja = Array.isArray(json.ja) ? (json.ja as string[]) : [];
+  const en = Array.isArray(json.en) ? (json.en as string[]) : [];
+
+  if (!isValidHaiku(ja)) {
+    if (attempt < 3) {
+      return englishToHaiku(text, attempt + 1);
+    }
+    throw new Error("Generated haiku does not follow the 5-7-5 character pattern");
+  }
+
+  return { ja, en };
+}
+
+function isValidHaiku(lines: string[]): boolean {
+  if (lines.length !== 3) return false;
+  const [first, second, third] = lines;
+  return first.length === 5 && second.length === 7 && third.length === 5;
 }
