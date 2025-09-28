@@ -33,8 +33,8 @@ export async function englishToHaiku(
       model,
       temperature: 0.8,
       max_output_tokens: 300,
-      response_format: {
-        type: "json_schema",
+      text: {
+        format: "json_schema",
         json_schema: {
           name: "haiku",
           schema: {
