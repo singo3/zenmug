@@ -26,44 +26,42 @@ export async function englishToHaiku(
       text: {
         format: {
           type: "json_schema",
-          json_schema: {
-            name: "haiku",
-            schema: {
-              type: "object",
-              additionalProperties: false,
-              required: ["ja", "en"],
-              properties: {
-                ja: {
-                  type: "array",
-                  minItems: 3,
-                  maxItems: 3,
-                  prefixItems: [
-                    {
-                      type: "string",
-                      minLength: 5,
-                      maxLength: 5,
-                      description: "Japanese haiku first line (5 characters)",
-                    },
-                    {
-                      type: "string",
-                      minLength: 7,
-                      maxLength: 7,
-                      description: "Japanese haiku second line (7 characters)",
-                    },
-                    {
-                      type: "string",
-                      minLength: 5,
-                      maxLength: 5,
-                      description: "Japanese haiku third line (5 characters)",
-                    },
-                  ],
-                },
-                en: {
-                  type: "array",
-                  minItems: 3,
-                  maxItems: 3,
-                  items: { type: "string" },
-                },
+          name: "haiku",
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            required: ["ja", "en"],
+            properties: {
+              ja: {
+                type: "array",
+                minItems: 3,
+                maxItems: 3,
+                prefixItems: [
+                  {
+                    type: "string",
+                    minLength: 5,
+                    maxLength: 5,
+                    description: "Japanese haiku first line (5 characters)",
+                  },
+                  {
+                    type: "string",
+                    minLength: 7,
+                    maxLength: 7,
+                    description: "Japanese haiku second line (7 characters)",
+                  },
+                  {
+                    type: "string",
+                    minLength: 5,
+                    maxLength: 5,
+                    description: "Japanese haiku third line (5 characters)",
+                  },
+                ],
+              },
+              en: {
+                type: "array",
+                minItems: 3,
+                maxItems: 3,
+                items: { type: "string" },
               },
             },
           },
