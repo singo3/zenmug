@@ -33,6 +33,10 @@ When the OpenAI API says that the value must be “a valid JSON Schema,” it is
 
 Any other JSON type—arrays, strings, numbers—violates the JSON Schema format rules and therefore triggers the error. In other words, the value assigned to `schema` must be an **object** (or `true`/`false`). The Responses API validates this before it ever generates text, so the error is **not** caused by the model failing to produce 5-7-5 lines—the request is rejected because the schema is malformed.
 
+### Why it “used to work” earlier in the day
+
+When no schema (or an always-true schema) is supplied, the model can return any text. In that situation the request succeeds, but the generated haiku is not guaranteed to respect the 5-7-5 pattern—hence the earlier non-5-7-5 output. After updating the request to add the strict schema above, the API now validates the payload before generation. Because the schema is expressed as an **array** instead of an **object**, the request is rejected at validation time and returns the `Invalid schema` error. In short: the first request passed because there was no schema enforcement, whereas the new request fails before generation because the schema format is invalid.
+
 #### 日本語での説明
 
 OpenAI API が「有効な JSON Schema である必要がある」と言うとき、`schema` に入れる値は次のどちらかでなければなりません。
@@ -41,6 +45,10 @@ OpenAI API が「有効な JSON Schema である必要がある」と言うと�
 * すべてを許可する `true` または何も許可しない `false` のどちらかの **真偽値**
 
 それ以外の JSON の形（配列・文字列・数値など）を入れると「スキーマが不正」と見なされ、リクエストは 400 エラーになります。つまり、5-7-5 の制約を配列だけで表現しようとした場合のように、`schema` がオブジェクトになっていないと API 側で弾かれてしまいます。エラーはテキスト生成の失敗ではなく、リクエスト段階での形式チェックに失敗したことが原因です。
+
+#### なぜ「午前中は動いた」のか？
+
+スキーマを設定していなかった（あるいは常に `true` を返す緩いスキーマだった）場合、モデルは任意の文章を返せるためリクエストは成功します。ただし 5-7-5 の保証がないため、最初に生成された俳句が 5-7-5 でなかったのはこのためです。その後、5-7-5 を厳密に強制しようとして上記のような配列のスキーマを追加すると、OpenAI 側のバリデーションで「配列は JSON Schema として無効」と判断され、生成処理に入る前に 400 エラーが返されるようになります。つまり、以前はスキーマ検証が行われていなかったため動作し、現在は不正なスキーマが原因でエラーになっているという違いです。
 
 To describe an array whose elements have different constraints, wrap the rules in an object and use keywords such as [`type`], [`items`] or [`prefixItems`]:
 
