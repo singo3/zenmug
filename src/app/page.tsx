@@ -149,10 +149,19 @@ export default function Home() {
       />
 
       {haiku && (
-        <div className="mt-4 text-center text-sm text-gray-700">
-          {haiku.en.map((line, i) => (
-            <p key={i}>{line}</p>
-          ))}
+        <div className="mt-4 flex flex-col items-center gap-3 text-sm text-gray-700">
+          <div className="text-center">
+            <p className="font-semibold">English</p>
+            {haiku.en.map((line, i) => (
+              <p key={`en-${i}`}>{line}</p>
+            ))}
+          </div>
+          <div className="text-center">
+            <p className="font-semibold">日本語</p>
+            {haiku.ja.map((line, i) => (
+              <p key={`ja-${i}`}>{line}</p>
+            ))}
+          </div>
         </div>
       )}
     </main>
