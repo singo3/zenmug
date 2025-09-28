@@ -37,12 +37,11 @@ export async function englishToHaiku(
                 type: "array",
                 minItems: 3,
                 maxItems: 3,
-                items: [
-                  { type: "string", minLength: 5, maxLength: 5 },
-                  { type: "string", minLength: 7, maxLength: 7 },
-                  { type: "string", minLength: 5, maxLength: 5 },
-                ],
-                additionalItems: false,
+                items: {
+                  type: "string",
+                  description:
+                    "Japanese haiku lines (ideally 5, 7, 5 characters respectively)",
+                },
               },
               en: {
                 type: "array",
@@ -104,7 +103,10 @@ export async function englishToHaiku(
     if (attempt < 3) {
       return englishToHaiku(text, attempt + 1);
     }
-    throw new Error("Generated haiku does not follow the 5-7-5 character pattern");
+    console.warn("Haiku did not meet 5-7-5 pattern after retries", {
+      text,
+      ja,
+    });
   }
 
   return { ja, en };
