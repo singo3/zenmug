@@ -1,5 +1,27 @@
 # Troubleshooting
 
+## OpenAI API error: Unsupported parameter `response_format`
+
+If you receive an error such as:
+
+```
+OpenAI API error: 400 Bad Request - Unsupported parameter: 'response_format'. In the Responses API, this parameter has moved to 'text.format'.
+```
+
+update your request payload to place the JSON Schema options under the [`text.format` field](https://platform.openai.com/docs/api-reference/responses/create#responses-create-text).
+
+```ts
+text: {
+  format: "json_schema",
+  json_schema: {
+    name: "haiku",
+    schema: { /* ... */ },
+  },
+},
+```
+
+Older payloads used the `response_format` key, but that parameter has been removed from the Responses API. After migrating to `text.format`, the rest of this guide about supplying a valid JSON Schema still applies.
+
 ## OpenAI API error: Invalid schema for `response_format`
 
 If the OpenAI Responses API returns an error such as:
@@ -8,10 +30,10 @@ If the OpenAI Responses API returns an error such as:
 OpenAI API error: 400 Bad Request - Invalid schema for response_format 'haiku': [{'type': 'string', 'minLength': 5, 'maxLength': 5}, {'type': 'string', 'minLength': 7, 'maxLength': 7}, {'type': 'string', 'minLength': 5, 'maxLength': 5}] is not of type 'object', 'boolean'.
 ```
 
-it means that the `response_format` (or `text.format` in legacy payloads) was given a `schema` value that is not a valid JSON Schema object. This typically happens when the schema is set to an array of item definitions in an attempt to enforce 5-7-5 constraints, for example:
+it means that the `text.format` (formerly `response_format`) value was given a `schema` that is not a valid JSON Schema object. This typically happens when the schema is set to an array of item definitions in an attempt to enforce 5-7-5 constraints, for example:
 
 ```ts
-response_format: {
+text: {
   type: "json_schema",
   json_schema: {
     name: "haiku",
@@ -53,7 +75,7 @@ OpenAI API が「有効な JSON Schema である必要がある」と言うと�
 To describe an array whose elements have different constraints, wrap the rules in an object and use keywords such as [`type`], [`items`] or [`prefixItems`]:
 
 ```ts
-response_format: {
+text: {
   type: "json_schema",
   json_schema: {
     name: "haiku",
@@ -91,7 +113,7 @@ With the schema expressed as an object, the request satisfies the API's validati
 If you only need the model to return three text lines—without strictly enforcing the 5-7-5 syllable counts—you can keep the schema even simpler. The following schema accepts any three strings, so it never triggers the validation error while still providing a predictable structure in the response:
 
 ```ts
-response_format: {
+text: {
   type: "json_schema",
   json_schema: {
     name: "haiku",
@@ -119,7 +141,7 @@ Because the schema is an object, it remains valid JSON Schema. At the same time 
 5-7-5 の音節制約まで厳密にチェックしたい場合は上記のように `prefixItems` を使って条件を書く必要がありますが、単に「3 行のテキストを返してほしい」だけならもっと緩いスキーマでも十分です。例えば次のように、`lines` プロパティが文字列の配列であることだけを指定します。
 
 ```ts
-response_format: {
+text: {
   type: "json_schema",
   json_schema: {
     name: "haiku",
