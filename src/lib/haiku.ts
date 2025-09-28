@@ -26,6 +26,7 @@ export async function englishToHaiku(
       text: {
         format: {
           type: "json_schema",
+          name: "haiku",
           json_schema: {
             name: "haiku",
             schema: {
