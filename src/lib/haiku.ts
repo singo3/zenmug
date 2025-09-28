@@ -13,6 +13,16 @@ export async function englishToHaiku(
   }
   const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
+  const prompt = [
+    "You transform English input into a Japanese haiku.",
+    "Return strict JSON with keys 'ja' and 'en'.",
+    "'ja' must be an array of exactly three Japanese strings.",
+    "Line one must contain exactly 5 characters, line two 7 characters, and line three 5 characters—counting literal characters, not syllables.",
+    "Do not include punctuation, spaces, or ruby/furigana in the Japanese lines.",
+    "'en' must be an array of natural English translations, one per line in the same order.",
+    `English text: ${text}`,
+  ].join("\n");
+
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -23,66 +33,51 @@ export async function englishToHaiku(
       model,
       temperature: 0.8,
       max_output_tokens: 300,
-      text: {
-        format: {
-          type: "json_schema",
+      response_format: {
+        type: "json_schema",
+        json_schema: {
           name: "haiku",
-          json_schema: {
-            schema: {
-              type: "object",
-              additionalProperties: false,
-              required: ["ja", "en"],
-              properties: {
-                ja: {
-                  type: "array",
-                  minItems: 3,
-                  maxItems: 3,
-                  prefixItems: [
-                    {
-                      type: "string",
-                      minLength: 5,
-                      maxLength: 5,
-                      description: "Japanese haiku first line (5 characters)",
-                    },
-                    {
-                      type: "string",
-                      minLength: 7,
-                      maxLength: 7,
-                      description: "Japanese haiku second line (7 characters)",
-                    },
-                    {
-                      type: "string",
-                      minLength: 5,
-                      maxLength: 5,
-                      description: "Japanese haiku third line (5 characters)",
-                    },
-                  ],
-                },
-                en: {
-                  type: "array",
-                  minItems: 3,
-                  maxItems: 3,
-                  items: { type: "string" },
-                },
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            required: ["ja", "en"],
+            properties: {
+              ja: {
+                type: "array",
+                minItems: 3,
+                maxItems: 3,
+                prefixItems: [
+                  {
+                    type: "string",
+                    minLength: 5,
+                    maxLength: 5,
+                    description: "Japanese haiku first line (5 characters)",
+                  },
+                  {
+                    type: "string",
+                    minLength: 7,
+                    maxLength: 7,
+                    description: "Japanese haiku second line (7 characters)",
+                  },
+                  {
+                    type: "string",
+                    minLength: 5,
+                    maxLength: 5,
+                    description: "Japanese haiku third line (5 characters)",
+                  },
+                ],
+              },
+              en: {
+                type: "array",
+                minItems: 3,
+                maxItems: 3,
+                items: { type: "string" },
               },
             },
           },
         },
       },
-      input: [
-        {
-          role: "system",
-          content: [
-            "You transform English input into a Japanese haiku.",
-            "Return strict JSON with keys 'ja' and 'en'.",
-            "'ja' must be an array of exactly three Japanese strings.",
-            "Line one must contain exactly 5 characters, line two 7 characters, and line three 5 characters—counting literal characters, not syllables.",
-            "Do not include punctuation, spaces, or ruby/furigana in the Japanese lines.",
-            "'en' must be an array of natural English translations, one per line in the same order.",
-          ].join(" "),
-        },
-        { role: "user", content: `Text: ${text}` },
-      ],
+      input: prompt,
     }),
   });
 
