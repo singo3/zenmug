@@ -24,30 +24,49 @@ export async function englishToHaiku(
       temperature: 0.8,
       max_output_tokens: 300,
       text: {
+        // `response_format` was renamed to `text.format` in the Responses API.
+        // Continue enforcing the schema via the new field so the request passes
+        // validation while still guaranteeing 5-7-5 output.
         format: {
           type: "json_schema",
-          name: "haiku",
-          strict: true,
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            required: ["ja", "en"],
-            properties: {
-              ja: {
-                type: "array",
-                minItems: 3,
-                maxItems: 3,
-                items: {
-                  type: "string",
-                  description:
-                    "Japanese haiku lines (ideally 5, 7, 5 characters respectively)",
+          json_schema: {
+            name: "haiku",
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              required: ["ja", "en"],
+              properties: {
+                ja: {
+                  type: "array",
+                  minItems: 3,
+                  maxItems: 3,
+                  prefixItems: [
+                    {
+                      type: "string",
+                      minLength: 5,
+                      maxLength: 5,
+                      description: "Japanese haiku first line (5 characters)",
+                    },
+                    {
+                      type: "string",
+                      minLength: 7,
+                      maxLength: 7,
+                      description: "Japanese haiku second line (7 characters)",
+                    },
+                    {
+                      type: "string",
+                      minLength: 5,
+                      maxLength: 5,
+                      description: "Japanese haiku third line (5 characters)",
+                    },
+                  ],
                 },
-              },
-              en: {
-                type: "array",
-                minItems: 3,
-                maxItems: 3,
-                items: { type: "string" },
+                en: {
+                  type: "array",
+                  minItems: 3,
+                  maxItems: 3,
+                  items: { type: "string" },
+                },
               },
             },
           },
