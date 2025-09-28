@@ -23,11 +23,10 @@ export async function englishToHaiku(
       model,
       temperature: 0.8,
       max_output_tokens: 300,
-      text: {
-        format: {
-          type: "json_schema",
+      response_format: {
+        type: "json_schema",
+        json_schema: {
           name: "haiku",
-          strict: true,
           schema: {
             type: "object",
             additionalProperties: false,
@@ -37,11 +36,26 @@ export async function englishToHaiku(
                 type: "array",
                 minItems: 3,
                 maxItems: 3,
-                items: {
-                  type: "string",
-                  description:
-                    "Japanese haiku lines (ideally 5, 7, 5 characters respectively)",
-                },
+                prefixItems: [
+                  {
+                    type: "string",
+                    minLength: 5,
+                    maxLength: 5,
+                    description: "Japanese haiku first line (5 characters)",
+                  },
+                  {
+                    type: "string",
+                    minLength: 7,
+                    maxLength: 7,
+                    description: "Japanese haiku second line (7 characters)",
+                  },
+                  {
+                    type: "string",
+                    minLength: 5,
+                    maxLength: 5,
+                    description: "Japanese haiku third line (5 characters)",
+                  },
+                ],
               },
               en: {
                 type: "array",
