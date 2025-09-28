@@ -84,6 +84,11 @@ Next.js (React + TypeScript + Tailwind CSS) を使った簡易ツール。日本
 
 ---
 
+## ❓ トラブルシューティング
+OpenAI API のエラー解釈など、よくある質問は [`docs/troubleshooting.md`](docs/troubleshooting.md) にまとめています。
+
+---
+
 ## 🚀 デプロイ (GitHub & Vercel)
 - このリポジトリは GitHub へのプッシュをトリガーとして Vercel で自動ビルド・デプロイされます。
 - Vercel のデプロイ結果を通して挙動を継続的に確認できます。
